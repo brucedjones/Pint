@@ -27,6 +27,7 @@ GfxShader GMultFS;
 GfxShader GThreshFS;
 GfxShader GDilateFS;
 GfxShader GErodeFS;
+GfxShader GLightFS;
 GfxProgram GSimpleProg;
 GfxProgram GYUVProg;
 GfxProgram GBlurProg;
@@ -36,6 +37,7 @@ GfxProgram GMultProg;
 GfxProgram GThreshProg;
 GfxProgram GDilateProg;
 GfxProgram GErodeProg;
+GfxProgram GLightProg;
 GLuint GQuadVertexBuffer;
 
 void InitGraphics()
@@ -63,7 +65,7 @@ void InitGraphics()
 		EGL_NONE
 	};
 
-	static const EGLint context_attributes[] = 
+	static const EGLint context_attributes[] =
 	{
 		EGL_CONTEXT_CLIENT_VERSION, 2,
 		EGL_NONE
@@ -107,7 +109,7 @@ void InitGraphics()
 	src_rect.x = 0;
 	src_rect.y = 0;
 	src_rect.width = GScreenWidth << 16;
-	src_rect.height = GScreenHeight << 16;        
+	src_rect.height = GScreenHeight << 16;
 
 	dispman_display = vc_dispmanx_display_open( 0 /* LCD */);
 	dispman_update = vc_dispmanx_update_start( 0 );
@@ -147,6 +149,7 @@ void InitGraphics()
 	GThreshFS.LoadFragmentShader("threshfragshader.glsl");
 	GDilateFS.LoadFragmentShader("dilatefragshader.glsl");
 	GErodeFS.LoadFragmentShader("erodefragshader.glsl");
+	GLightFS.LoadFragmentShader("lightfragshader.glsl");
 	GSimpleProg.Create(&GSimpleVS,&GSimpleFS);
 	GYUVProg.Create(&GSimpleVS,&GYUVFS);
 	GBlurProg.Create(&GSimpleVS,&GBlurFS);
@@ -156,6 +159,7 @@ void InitGraphics()
 	GThreshProg.Create(&GSimpleVS,&GThreshFS);
 	GDilateProg.Create(&GSimpleVS,&GDilateFS);
 	GErodeProg.Create(&GSimpleVS,&GErodeFS);
+	GLightProg.Create(&GSimpleVS,&GLightFS);
 	check();
 
 	//create an ickle vertex buffer
@@ -310,7 +314,7 @@ bool GfxProgram::Create(GfxShader* vertex_shader, GfxShader* fragment_shader)
 	glGetProgramInfoLog(Id,sizeof log,NULL,log);
 	printf("%d:program:\n%s\n", Id, log);
 
-	return true;	
+	return true;
 }
 
 void DrawTextureRect(GfxTexture* texture, float x0, float y0, float x1, float y1, GfxTexture* render_target)
@@ -528,6 +532,42 @@ void DrawErodeRect(GfxTexture* texture, float x0, float y0, float x1, float y1, 
 	}
 }
 
+void DrawLightRect(GfxTexture* texture, float x0, float y0, float x1, float y1, GfxTexture* render_target)
+{
+	if(render_target)
+	{
+		glBindFramebuffer(GL_FRAMEBUFFER,render_target->GetFramebufferId());
+		glViewport ( 0, 0, render_target->GetWidth(), render_target->GetHeight() );
+		check();
+	}
+
+	glUseProgram(GLightProg.GetId());	check();
+
+	glUniform2f(glGetUniformLocation(GLightProg.GetId(),"offset"),x0,y0);
+	glUniform2f(glGetUniformLocation(GLightProg.GetId(),"scale"),x1-x0,y1-y0);
+	glUniform1i(glGetUniformLocation(GLightProg.GetId(),"tex"), 0);
+	glUniform2f(glGetUniformLocation(GLightProg.GetId(),"texelsize"),1.f/texture->GetWidth(),1.f/texture->GetHeight());
+	check();
+
+	glBindBuffer(GL_ARRAY_BUFFER, GQuadVertexBuffer);	check();
+	glBindTexture(GL_TEXTURE_2D,texture->GetId());	check();
+
+	GLuint loc = glGetAttribLocation(GSimpleProg.GetId(),"vertex");
+	glVertexAttribPointer(loc, 4, GL_FLOAT, 0, 16, 0);	check();
+	glEnableVertexAttribArray(loc);	check();
+	glDrawArrays ( GL_TRIANGLE_STRIP, 0, 4 ); check();
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	if(render_target)
+	{
+		//glFinish();	check();
+		//glFlush(); check();
+		glBindFramebuffer(GL_FRAMEBUFFER,0);
+		glViewport ( 0, 0, GScreenWidth, GScreenHeight );
+	}
+}
+
 void DrawSobelRect(GfxTexture* texture, float x0, float y0, float x1, float y1, GfxTexture* render_target)
 {
 	if(render_target)
@@ -714,7 +754,7 @@ void SaveFrameBuffer(const char* fname)
 	glReadPixels(0,0,GScreenWidth,GScreenHeight, GL_RGBA, GL_UNSIGNED_BYTE, image);
 
 	unsigned error = lodepng::encode(fname, (const unsigned char*)image, GScreenWidth, GScreenHeight, LCT_RGBA);
-	if(error) 
+	if(error)
 		printf("error: %d\n",error);
 
 	free(image);
@@ -731,7 +771,7 @@ void GfxTexture::Save(const char* fname)
 	glBindFramebuffer(GL_FRAMEBUFFER,0);
 
 	unsigned error = lodepng::encode(fname, (const unsigned char*)image, Width, Height, IsRGBA ? LCT_RGBA : LCT_GREY);
-	if(error) 
+	if(error)
 		printf("error: %d\n",error);
 
 	free(image);
