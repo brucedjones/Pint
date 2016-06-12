@@ -8,6 +8,6 @@ void main(void)
 	const vec4 W = vec4(0.2125, 0.7154, 0.0721,0.0);
 	float luminance = dot(col, W);
 	if(luminance<0.5) luminance = 0.0;
-
-	gl_FragColor = vec4(luminance);
+	//col *= luminance;
+	gl_FragColor = col;
 }

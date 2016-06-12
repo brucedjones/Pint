@@ -18,7 +18,7 @@ int main(int argc, const char **argv)
 	CCamera* cam = StartCamera(MAIN_TEXTURE_WIDTH, MAIN_TEXTURE_HEIGHT,15,1,false);
 
 	//create 4 textures of decreasing size
-	GfxTexture ytexture,utexture,vtexture,rgbtextures[32],lightTexture;
+	GfxTexture ytexture,utexture,vtexture,rgbtextures[32],lightTexture, lightTexture2, lightTexture3;
 	ytexture.CreateGreyScale(MAIN_TEXTURE_WIDTH,MAIN_TEXTURE_HEIGHT);
 	utexture.CreateGreyScale(MAIN_TEXTURE_WIDTH/2,MAIN_TEXTURE_HEIGHT/2);
 	vtexture.CreateGreyScale(MAIN_TEXTURE_WIDTH/2,MAIN_TEXTURE_HEIGHT/2);
@@ -44,6 +44,10 @@ int main(int argc, const char **argv)
 
 	lightTexture.CreateRGBA(MAIN_TEXTURE_WIDTH,MAIN_TEXTURE_HEIGHT);
 	lightTexture.GenerateFrameBuffer();
+	lightTexture2.CreateRGBA(MAIN_TEXTURE_WIDTH,MAIN_TEXTURE_HEIGHT);
+	lightTexture2.GenerateFrameBuffer();
+	lightTexture3.CreateRGBA(MAIN_TEXTURE_WIDTH,MAIN_TEXTURE_HEIGHT);
+	lightTexture3.GenerateFrameBuffer();
 
 	printf("Running frame loop\n");
 
@@ -61,6 +65,10 @@ int main(int argc, const char **argv)
 	cbreak();       /* take input chars one at a time, no wait for \n */
 	clear();
 	nodelay(stdscr, TRUE);
+
+	//BeginFrame();
+	//DrawMultRect(&lightTexture2,-1.f,-1.f,1.f,1.f,0.0f,0.0f,0.0f,&lightTexture);
+	//EndFrame();
 
 	for(int i = 0; i < 3000; i++)
 	{
@@ -107,8 +115,20 @@ int main(int argc, const char **argv)
 		DrawTextureRect(&utexture,-1,-1,1,1,&ureadtexture);
 		DrawTextureRect(&vtexture,-1,-1,1,1,&vreadtexture);
 
-		DrawLightRect(&rgbtextures[0],-1.f,-1.f,1.f,1.f,&lightTexture);
-		DrawTextureRect(&lightTexture,-1,-1,1,1,NULL);
+		// Compute luminance from RGB, (in=rgb,out=light)
+		// Where luminance!=0 add to light2 texture (in=light,light2,out=light3);
+		// multiply light3 texture by 0.9 (in=light3, out=light2)
+		// draw light2 texture
+
+		/*DrawLightRect(&rgbtextures[0],-1.f,-1.f,1.f,1.f,&lightTexture);
+		DrawAddRect(&lightTexture,&lightTexture2,-1.f,-1.f,1.f,1.f,&lightTexture3);
+		DrawMultRect(&lightTexture3,-1.f,-1.f,1.f,1.f,0.9f,0.9f,0.9f,&lightTexture2);
+		DrawTextureRect(&lightTexture2,-1,-1,1,1,NULL);*/
+
+		//DrawLightRect(&rgbtextures[0],-1.f,-1.f,1.f,1.f,&lightTexture);
+		DrawAddRect(&rgbtextures[0],&lightTexture2,-1.f,-1.f,1.f,1.f,&lightTexture3);
+		DrawMultRect(&lightTexture3,-1.f,-1.f,1.f,1.f,0.9f,0.9f,0.9f,&lightTexture2);
+		DrawTextureRect(&lightTexture2,-1,-1,1,1,NULL);
 		EndFrame();
 
 		//read current time

@@ -77,3 +77,4 @@ void DrawThreshRect(GfxTexture* texture, float x0, float y0, float x1, float y1,
 void DrawDilateRect(GfxTexture* texture, float x0, float y0, float x1, float y1, GfxTexture* render_target);
 void DrawErodeRect(GfxTexture* texture, float x0, float y0, float x1, float y1, GfxTexture* render_target);
 void DrawLightRect(GfxTexture* texture, float x0, float y0, float x1, float y1, GfxTexture* render_target);
+void DrawAddRect(GfxTexture* texture, GfxTexture* texture2, float x0, float y0, float x1, float y1, GfxTexture* render_target);
