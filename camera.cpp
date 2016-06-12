@@ -1,8 +1,8 @@
 /*
 Chris Cummings
-This is wraps up the camera system in a simple StartCamera, StopCamera and ReadFrame api to read 
-data from the feed. Based on parts of raspivid, and the work done by Pierre Raus at 
-http://raufast.org/download/camcv_vid0.c to get the camera feeding into opencv. It 
+This is wraps up the camera system in a simple StartCamera, StopCamera and ReadFrame api to read
+data from the feed. Based on parts of raspivid, and the work done by Pierre Raus at
+http://raufast.org/download/camcv_vid0.c to get the camera feeding into opencv. It
 */
 
 #include "camera.h"
@@ -48,7 +48,7 @@ void StopCamera()
 
 CCamera::CCamera()
 {
-	CameraComponent = NULL;    
+	CameraComponent = NULL;
 	SplitterComponent = NULL;
 	VidToSplitConn = NULL;
 	memset(Outputs,0,sizeof(Outputs));
@@ -188,7 +188,7 @@ MMAL_COMPONENT_T* CCamera::CreateCameraComponentAndSetupPorts()
 	{
 		printf("Couldn't enable camera\n");
 		mmal_component_destroy(camera);
-		return NULL;	
+		return NULL;
 	}
 
 	return camera;
@@ -254,7 +254,7 @@ bool CCamera::Init(int width, int height, int framerate, int num_levels, bool do
 	bcm_host_init();
 
 	//store basic parameters
-	Width = width;       
+	Width = width;
 	Height = height;
 	FrameRate = framerate;
 
@@ -517,7 +517,7 @@ void CCameraOutput::OnVideoBufferCallback(MMAL_PORT_T *port, MMAL_BUFFER_HEADER_
 					status = mmal_port_send_buffer(port, new_buffer);
 				if (!new_buffer || status != MMAL_SUCCESS)
 					printf("Unable to return a buffer to the video port\n");
-			}	
+			}
 		}
 	}
 
@@ -601,7 +601,7 @@ void CCameraOutput::EndReadFrame()
 				status = mmal_port_send_buffer(BufferPort, new_buffer);
 			if (!new_buffer || status != MMAL_SUCCESS)
 				printf("Unable to return a buffer to the video port\n");
-		}	
+		}
 	}
 }
 

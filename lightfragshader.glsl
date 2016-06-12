@@ -7,7 +7,7 @@ void main(void)
 	col = texture2D(tex,tcoord);
 	const vec4 W = vec4(0.2125, 0.7154, 0.0721,0.0);
 	float luminance = dot(col, W);
-	if(luminance<0.5) luminance = 0.0;
-	//col *= luminance;
-	gl_FragColor = col;
+	vec4 col_out = vec4(0);
+	if(luminance>0.8) col_out = col;
+	gl_FragColor = col_out;
 }

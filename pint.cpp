@@ -5,8 +5,8 @@
 #include <time.h>
 #include <curses.h>
 
-#define MAIN_TEXTURE_WIDTH 1024
-#define MAIN_TEXTURE_HEIGHT 768
+#define MAIN_TEXTURE_WIDTH 768
+#define MAIN_TEXTURE_HEIGHT 480
 
 char tmpbuff[MAIN_TEXTURE_WIDTH*MAIN_TEXTURE_HEIGHT*4];
 
@@ -120,15 +120,17 @@ int main(int argc, const char **argv)
 		// multiply light3 texture by 0.9 (in=light3, out=light2)
 		// draw light2 texture
 
-		/*DrawLightRect(&rgbtextures[0],-1.f,-1.f,1.f,1.f,&lightTexture);
+		DrawLightRect(&rgbtextures[0],-1.f,-1.f,1.f,1.f,&lightTexture);
 		DrawAddRect(&lightTexture,&lightTexture2,-1.f,-1.f,1.f,1.f,&lightTexture3);
+		DrawMultRect(&lightTexture3,-1.f,-1.f,1.f,1.f,0.99f,0.99f,0.99f,&lightTexture2);
+		DrawAddRect(&rgbtextures[0],&lightTexture2,-1.f,-1.f,1.f,1.f,&lightTexture3);
+		DrawTextureRect(&lightTexture3,-1,-1,1,1,NULL);
+
+		//DrawLightRect(&rgbtextures[0],-1.f,-1.f,1.f,1.f,&lightTexture);
+		/*DrawAddRect(&rgbtextures[0],&lightTexture2,-1.f,-1.f,1.f,1.f,&lightTexture3);
 		DrawMultRect(&lightTexture3,-1.f,-1.f,1.f,1.f,0.9f,0.9f,0.9f,&lightTexture2);
 		DrawTextureRect(&lightTexture2,-1,-1,1,1,NULL);*/
 
-		//DrawLightRect(&rgbtextures[0],-1.f,-1.f,1.f,1.f,&lightTexture);
-		DrawAddRect(&rgbtextures[0],&lightTexture2,-1.f,-1.f,1.f,1.f,&lightTexture3);
-		DrawMultRect(&lightTexture3,-1.f,-1.f,1.f,1.f,0.9f,0.9f,0.9f,&lightTexture2);
-		DrawTextureRect(&lightTexture2,-1,-1,1,1,NULL);
 		EndFrame();
 
 		//read current time
